@@ -9,7 +9,14 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@pdf-lib/fontkit": "^1.1.1",
+    "@supabase/supabase-js": "^2.84.0",
+    "@yudiel/react-qr-scanner": "^2.4.1",
+    "jsqr": "^1.4.0",
     "next": "16.0.4",
+    "pdf-lib": "^1.17.1",
+    "qrcode": "^1.5.4",
+    "qrcode.react": "^4.2.0",
     "react": "19.2.0",
     "react-dom": "19.2.0"
   },
