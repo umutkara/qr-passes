@@ -9,7 +9,10 @@ export function getSupabaseClient() {
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error('Missing Supabase environment variables')
+    console.error('Missing Supabase environment variables')
+    // Create a dummy client to prevent crashes
+    supabaseClient = createClient('https://dummy.supabase.co', 'dummy-key')
+    return supabaseClient
   }
 
   supabaseClient = createClient(supabaseUrl, supabaseAnonKey)
