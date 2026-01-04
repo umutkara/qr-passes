@@ -3,8 +3,10 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
-  // Use Turbopack for better performance
-  turbopack: {},
+  // Configure Turbopack to handle Cyrillic paths
+  turbopack: {
+    root: process.cwd(),
+  },
 };
 
 export default nextConfig;
