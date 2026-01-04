@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { getSupabaseClient } from '../../lib/supabase';
@@ -15,6 +15,37 @@ export default function LoginPage() {
   });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // Check for success message from registration (client-side only)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const message = urlParams.get('message');
+      if (message) {
+        setSuccessMessage(message);
+        // Clean up URL
+        router.replace('/login');
+      }
+    }
+  }, [router]);
+
+  // Redirect if already authenticated (client-side only)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const checkAuth = async () => {
+        try {
+          const { data: { user } } = await getSupabaseClient().auth.getUser();
+          if (user) {
+            router.replace('/panel');
+          }
+        } catch (error) {
+          console.error('Auth check error:', error);
+        }
+      };
+      checkAuth();
+    }
+  }, [router]);
 
   function handleInputChange(field: string, value: string) {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -40,12 +71,14 @@ export default function LoginPage() {
     }
 
     try {
+      console.log('Starting login...');
       const { data, error: authError } = await getSupabaseClient().auth.signInWithPassword({
         email: formData.email.trim(),
         password: formData.password,
       });
 
       if (authError) {
+        console.error('Login error:', authError);
         throw new Error(authError.message);
       }
 
@@ -53,10 +86,13 @@ export default function LoginPage() {
         throw new Error('Login failed - no user data');
       }
 
-      // Wait for session to be established
+      console.log('Login successful, user:', data.user.email);
+
+      // Small delay to ensure session is established
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      router.push('/panel');
+      router.replace('/panel');
+      router.refresh();
 
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Login failed';
@@ -80,6 +116,11 @@ export default function LoginPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {successMessage && (
+            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
+              {successMessage}
+            </div>
+          )}
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
               {error}
