@@ -15,7 +15,7 @@ export default async function PanelLayout({
   async function handleLogout() {
     "use server";
     try {
-      const supabase = supabaseServer();
+      const supabase = await supabaseServer();
       await supabase.auth.signOut();
     } catch (error) {
       console.error("Logout error:", error);
