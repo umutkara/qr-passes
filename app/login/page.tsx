@@ -40,7 +40,7 @@ export default function LoginPage() {
     }
 
     try {
-      const { error: authError } = await getSupabaseClient().auth.signInWithPassword({
+      const { data, error: authError } = await getSupabaseClient().auth.signInWithPassword({
         email: formData.email.trim(),
         password: formData.password,
       });
@@ -48,6 +48,13 @@ export default function LoginPage() {
       if (authError) {
         throw new Error(authError.message);
       }
+
+      if (!data.user) {
+        throw new Error('Login failed - no user data');
+      }
+
+      // Wait for session to be established
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       router.push('/panel');
 
