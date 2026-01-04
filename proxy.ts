@@ -38,6 +38,9 @@ export async function proxy(request: NextRequest) {
     }
   )
 
+  // Auth protection moved to app/panel/layout.tsx (server component)
+  // This middleware auth check is disabled to avoid conflicts
+  /*
   try {
     const {
       data: { user },
@@ -73,6 +76,7 @@ export async function proxy(request: NextRequest) {
     console.error('Middleware error:', error)
     // Continue with request if middleware fails
   }
+  */
 
   return response
 }

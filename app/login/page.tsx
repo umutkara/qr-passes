@@ -17,33 +17,14 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Check for success message from registration (client-side only)
+  // Check for success message from registration
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search);
-      const message = urlParams.get('message');
-      if (message) {
-        setSuccessMessage(message);
-        // Clean up URL
-        router.replace('/login');
-      }
-    }
-  }, [router]);
-
-  // Redirect if already authenticated (client-side only)
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const checkAuth = async () => {
-        try {
-          const { data: { user } } = await supabase.auth.getUser();
-          if (user) {
-            router.replace('/panel');
-          }
-        } catch (error) {
-          console.error('Auth check error:', error);
-        }
-      };
-      checkAuth();
+    const urlParams = new URLSearchParams(window.location.search);
+    const message = urlParams.get('message');
+    if (message) {
+      setSuccessMessage(message);
+      // Clean up URL
+      router.replace('/login');
     }
   }, [router]);
 
@@ -72,33 +53,24 @@ export default function LoginPage() {
 
     try {
       console.log('Starting login...');
-      const { data, error: authError } = await supabase.auth.signInWithPassword({
-        email: formData.email.trim(),
-        password: formData.password,
+
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: formData.email.trim(),
+          password: formData.password,
+        }),
       });
 
-      if (authError) {
-        console.error('Login error:', authError);
-        throw new Error(authError.message);
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Login failed");
       }
 
-      if (!data.user) {
-        throw new Error('Login failed - no user data');
-      }
-
-      console.log('Login successful, user:', data.user.email);
-
-      // Check session immediately after login
-      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-      console.log('Session after login:', sessionData.session ? 'EXISTS' : 'MISSING');
-      if (sessionError) console.error('Session error:', sessionError);
-
-      // Small delay to ensure session is established
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      console.log('Redirecting to /panel...');
-      router.replace('/panel');
-      router.refresh();
+      console.log('Login successful, redirecting to /panel...');
+      window.location.assign('/panel');
 
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Login failed';

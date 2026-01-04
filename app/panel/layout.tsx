@@ -1,23 +1,26 @@
-'use client';
-
+import { redirect } from "next/navigation";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { supabase } from '../../lib/supabase';
+import { supabaseServer } from '../../lib/supabase/server';
 
-export default function PanelLayout({
+export default async function PanelLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const router = useRouter();
+  const supabase = supabaseServer();
+  const { data } = await supabase.auth.getUser();
+
+  if (!data.user) redirect("/login");
 
   async function handleLogout() {
+    "use server";
     try {
+      const supabase = supabaseServer();
       await supabase.auth.signOut();
     } catch (error) {
       console.error("Logout error:", error);
     }
-    router.push("/register");
+    redirect("/register");
   }
 
   return (
@@ -45,30 +48,32 @@ export default function PanelLayout({
 
         {/* Logout button at bottom */}
         <div style={{ marginTop: "auto", paddingTop: 16, borderTop: "1px solid #eee" }}>
-          <button
-            onClick={handleLogout}
-            style={{
-              width: "100%",
-              padding: "8px 12px",
-              backgroundColor: "#f3f4f6",
-              border: "1px solid #d1d5db",
-              borderRadius: 6,
-              color: "#374151",
-              fontSize: 14,
-              cursor: "pointer",
-              transition: "all 0.2s",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = "#e5e7eb";
-              e.currentTarget.style.borderColor = "#9ca3af";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "#f3f4f6";
-              e.currentTarget.style.borderColor = "#d1d5db";
-            }}
-          >
-            Sign Out
-          </button>
+          <form action={handleLogout}>
+            <button
+              type="submit"
+              style={{
+                width: "100%",
+                padding: "8px 12px",
+                backgroundColor: "#f3f4f6",
+                border: "1px solid #d1d5db",
+                borderRadius: 6,
+                color: "#374151",
+                fontSize: 14,
+                cursor: "pointer",
+                transition: "all 0.2s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = "#e5e7eb";
+                e.currentTarget.style.borderColor = "#9ca3af";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "#f3f4f6";
+                e.currentTarget.style.borderColor = "#d1d5db";
+              }}
+            >
+              Sign Out
+            </button>
+          </form>
         </div>
       </aside>
 
