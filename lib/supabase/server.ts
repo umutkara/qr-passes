@@ -24,10 +24,9 @@ export async function supabaseServer() {
 
           return allCookies;
         },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            cookieStore.set(name, value, options);
-          });
+        setAll() {
+          // Cannot modify cookies in server components
+          // Cookies are only set in API routes
         },
       },
     }
