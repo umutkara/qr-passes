@@ -1,6 +1,7 @@
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import path from 'path';
+import ffmpegStatic from 'ffmpeg-static';
 
 const execAsync = promisify(exec);
 
@@ -33,7 +34,7 @@ export async function extractJpgFramesFromVideoUrl(params: {
       const outputFile = path.join(outDir, `${fileBase}_${i + 1}.jpg`);
 
       // FFmpeg команда для извлечения одного кадра в заданное время
-      const command = `ffmpeg -y -ss ${timestamp} -i "${videoUrl}" -vf "scale=720:-1" -frames:v 1 "${outputFile}"`;
+      const command = `"${ffmpegStatic}" -y -ss ${timestamp} -i "${videoUrl}" -vf "scale=720:-1" -frames:v 1 "${outputFile}"`;
 
       await execAsync(command);
       outputs.push(outputFile);
