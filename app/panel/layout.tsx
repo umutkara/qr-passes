@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { supabase } from '../../lib/supabase';
+import { getSupabaseClient } from '../../lib/supabase';
 
 export default function PanelLayout({
   children,
@@ -13,7 +13,7 @@ export default function PanelLayout({
 
   async function handleLogout() {
     try {
-      await supabase.auth.signOut();
+      await getSupabaseClient().auth.signOut();
     } catch (error) {
       console.error("Logout error:", error);
     }

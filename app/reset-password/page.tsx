@@ -2,7 +2,7 @@
 
 import { useState, FormEvent, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { supabase } from '../../lib/supabase';
+import { getSupabaseClient } from '../../lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,7 +28,7 @@ function ResetPasswordForm() {
     }
 
     // Set the session with the tokens from URL
-    supabase.auth.setSession({
+    getSupabaseClient().auth.setSession({
       access_token: accessToken,
       refresh_token: refreshToken,
     });
@@ -58,7 +58,7 @@ function ResetPasswordForm() {
     }
 
     try {
-      const { error: updateError } = await supabase.auth.updateUser({
+      const { error: updateError } = await getSupabaseClient().auth.updateUser({
         password: formData.password
       });
 

@@ -3,7 +3,7 @@
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { supabase } from '../../lib/supabase';
+import { getSupabaseClient } from '../../lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
@@ -56,7 +56,7 @@ export default function RegisterPage() {
 
     try {
       // Sign up with Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      const { data: authData, error: authError } = await getSupabaseClient().auth.signUp({
         email: formData.email.trim(),
         password: formData.password,
       });
