@@ -1,0 +1,9 @@
+{
+  "functions": {
+    "app/api/**/*.ts": {
+      "runtime": "@vercel/node"
+    }
+  },
+  "buildCommand": "apt-get update && apt-get install -y ffmpeg && npm run build",
+  "installCommand": "npm install"
+}

@@ -243,7 +243,7 @@ export default function WebhookSettings() {
                 fontSize: 14,
                 color: "#6b7280"
               }}>
-                {formatDate(data?.webhook_updated_at)}
+                {formatDate(data?.webhook_updated_at ?? null)}
               </div>
             </div>
           </div>
