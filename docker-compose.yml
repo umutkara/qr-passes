@@ -1,0 +1,12 @@
+
+services:
+  ml:
+    build:
+      context: ./ml-service
+      dockerfile: Dockerfile
+    container_name: passguard-ml
+    ports:
+      - "8000:8000"
+    restart: always
+    environment:
+      - PYTHONUNBUFFERED=1

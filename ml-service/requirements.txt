@@ -1,0 +1,12 @@
+﻿insightface==0.7.3
+opencv-python-headless==4.7.0.72
+numpy
+onnxruntime
+fastapi
+uvicorn
+requests
+scikit-learn
+scipy
+mediapipe
+ultralytics==8.3.0
+easyocr==1.7.1
