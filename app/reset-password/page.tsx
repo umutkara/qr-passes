@@ -4,6 +4,8 @@ import { useState, FormEvent, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '../../lib/supabase';
 
+export const dynamic = 'force-dynamic';
+
 function ResetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
