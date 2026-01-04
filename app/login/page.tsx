@@ -88,9 +88,15 @@ export default function LoginPage() {
 
       console.log('Login successful, user:', data.user.email);
 
+      // Check session immediately after login
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      console.log('Session after login:', sessionData.session ? 'EXISTS' : 'MISSING');
+      if (sessionError) console.error('Session error:', sessionError);
+
       // Small delay to ensure session is established
       await new Promise(resolve => setTimeout(resolve, 500));
 
+      console.log('Redirecting to /panel...');
       router.replace('/panel');
       router.refresh();
 

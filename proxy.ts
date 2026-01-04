@@ -41,7 +41,16 @@ export async function proxy(request: NextRequest) {
   try {
     const {
       data: { user },
+      error: userError
     } = await supabase.auth.getUser()
+
+    if (userError) {
+      console.error('Middleware getUser error:', userError)
+    }
+
+    console.log('Middleware - Path:', request.nextUrl.pathname)
+    console.log('Middleware - User:', user ? user.email : 'null')
+    console.log('Middleware - Cookies:', request.cookies.getAll().map(c => c.name))
 
     // Protect panel routes
     if (request.nextUrl.pathname.startsWith('/panel')) {
