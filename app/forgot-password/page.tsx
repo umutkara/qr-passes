@@ -2,7 +2,7 @@
 
 import { useState, FormEvent } from 'react';
 import Link from 'next/link';
-import { getSupabaseClient } from '../../lib/supabase';
+import { supabase } from '../../lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,7 +24,7 @@ export default function ForgotPasswordPage() {
     }
 
     try {
-      const { error: resetError } = await getSupabaseClient().auth.resetPasswordForEmail(email.trim(), {
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
         redirectTo: `${window.location.origin}/reset-password`,
       });
 

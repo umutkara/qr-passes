@@ -3,7 +3,7 @@
 import { useState, FormEvent, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { getSupabaseClient } from '../../lib/supabase';
+import { supabase } from '../../lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,7 +35,7 @@ export default function LoginPage() {
     if (typeof window !== 'undefined') {
       const checkAuth = async () => {
         try {
-          const { data: { user } } = await getSupabaseClient().auth.getUser();
+          const { data: { user } } = await supabase.auth.getUser();
           if (user) {
             router.replace('/panel');
           }
@@ -72,7 +72,7 @@ export default function LoginPage() {
 
     try {
       console.log('Starting login...');
-      const { data, error: authError } = await getSupabaseClient().auth.signInWithPassword({
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
         email: formData.email.trim(),
         password: formData.password,
       });

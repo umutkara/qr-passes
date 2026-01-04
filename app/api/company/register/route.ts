@@ -7,12 +7,41 @@ export async function POST(req: NextRequest) {
     const body = await req.json().catch(() => null);
     if (!body) return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
 
-    const { owner_user_id, name, contact_email, contact_telegram } = body;
+    const { email, password, name, contact_email, contact_telegram } = body;
 
     // Validation
-    if (!owner_user_id || typeof owner_user_id !== 'string') {
-      return NextResponse.json({ error: "Invalid user ID" }, { status: 400 });
+    if (!email || typeof email !== 'string' || !email.includes('@')) {
+      return NextResponse.json({ error: "Valid email address is required" }, { status: 400 });
     }
+
+    if (!password || typeof password !== 'string' || password.length < 6) {
+      return NextResponse.json({ error: "Password must be at least 6 characters long" }, { status: 400 });
+    }
+
+    if (!name || typeof name !== 'string' || name.trim().length < 2) {
+      return NextResponse.json({ error: "Company name must be at least 2 characters long" }, { status: 400 });
+    }
+
+    // Create user in Supabase Auth (auto-confirmed)
+    const { data: userData, error: userError } = await supabaseAdmin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true, // Auto-confirm email
+      user_metadata: {
+        name: name.trim()
+      }
+    });
+
+    if (userError) {
+      console.error('User creation error:', userError);
+      return NextResponse.json({ error: userError.message }, { status: 400 });
+    }
+
+    if (!userData.user) {
+      return NextResponse.json({ error: "Failed to create user account" }, { status: 500 });
+    }
+
+    const owner_user_id = userData.user.id;
 
     if (!name || typeof name !== 'string' || name.trim().length < 2) {
       return NextResponse.json({ error: "Company name must be at least 2 characters long" }, { status: 400 });

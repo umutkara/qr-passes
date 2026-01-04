@@ -3,7 +3,7 @@
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { getSupabaseClient } from '../../lib/supabase';
+import { supabase } from '../../lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
@@ -55,41 +55,28 @@ export default function RegisterPage() {
     }
 
     try {
-      // Sign up with Supabase Auth
-      const { data: authData, error: authError } = await getSupabaseClient().auth.signUp({
-        email: formData.email.trim(),
-        password: formData.password,
-      });
-
-      if (authError) {
-        throw new Error(authError.message);
-      }
-
-      if (!authData.user) {
-        throw new Error('Failed to create user account');
-      }
-
-      // Create company record
+      // Create user account and company via API (auto-confirmed)
       const res = await fetch('/api/company/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          owner_user_id: authData.user.id,
+          email: formData.email.trim(),
+          password: formData.password,
           name: formData.name.trim(),
           contact_email: formData.email.trim(),
-          contact_telegram: formData.telegram.trim() || null
+          contact_telegram: formData.telegram ? formData.telegram.trim() : null
         }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        // If company creation fails, we should clean up the auth user
-        // But for now, just throw the error
         throw new Error(data?.error || 'Failed to create company');
       }
 
-      router.push('/panel');
+      console.log('Registration successful! Redirecting to login...');
+      // Don't auto-login, redirect to login for manual authentication
+      router.push('/login?message=Registration successful! Please log in.');
 
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Registration failed';

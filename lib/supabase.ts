@@ -10,7 +10,3 @@ if (!supabaseUrl || !supabaseAnonKey) {
 // Client-side Supabase client
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-// For backward compatibility
-export function getSupabaseClient() {
-  return supabase
-}
