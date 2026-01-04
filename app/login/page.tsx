@@ -63,10 +63,22 @@ export default function LoginPage() {
         }),
       });
 
-      const data = await res.json();
+      console.log('Login response status:', res.status);
+      console.log('Login response ok:', res.ok);
+
+      let data;
+      try {
+        data = await res.json();
+        console.log('Login response data:', data);
+      } catch (jsonError) {
+        console.error('Failed to parse JSON response:', jsonError);
+        const text = await res.text();
+        console.error('Raw response:', text);
+        throw new Error(`Server error: ${res.status} ${res.statusText}`);
+      }
 
       if (!res.ok) {
-        throw new Error(data.error || "Login failed");
+        throw new Error(data?.error || `Login failed: ${res.status}`);
       }
 
       console.log('Login successful, redirecting to /panel...');
