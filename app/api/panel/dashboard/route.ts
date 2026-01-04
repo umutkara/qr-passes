@@ -62,12 +62,46 @@ export async function GET(req: NextRequest) {
     }
   )
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  // Check authentication via cookies (same as panel layout)
+  const allCookies = req.cookies.getAll();
+  console.log('API dashboard - all cookies:', allCookies.map(c => `${c.name}=${c.value.substring(0, 20)}...`));
 
-  if (!user) {
+  const sbAccessToken = req.cookies.get('sb-access-token');
+  const sbRefreshToken = req.cookies.get('sb-refresh-token');
+  const projectRef = process.env.NEXT_PUBLIC_SUPABASE_URL?.split('//')[1]?.split('.')[0];
+  const sbProjectToken = projectRef ? req.cookies.get(`sb-${projectRef}-auth-token`) : null;
+
+  console.log('API dashboard - auth cookies check:', {
+    sbAccessToken: !!sbAccessToken,
+    sbRefreshToken: !!sbRefreshToken,
+    sbProjectToken: !!sbProjectToken,
+    projectRef
+  });
+
+  if (!sbAccessToken && !sbRefreshToken && !sbProjectToken) {
+    console.log('API dashboard - no auth cookies found, returning 401');
     return NextResponse.json({ error: "Not logged in" }, { status: 401 })
+  }
+
+  console.log('API dashboard - auth cookies present, proceeding');
+
+  // Decode JWT token to get user ID
+  let userId = null;
+  if (sbAccessToken) {
+    try {
+      // Simple JWT decode (without verification for now)
+      const payload = sbAccessToken.split('.')[1];
+      const decoded = JSON.parse(atob(payload));
+      userId = decoded.sub;
+      console.log('API dashboard - decoded user ID from token:', userId);
+    } catch (error) {
+      console.error('API dashboard - failed to decode token:', error);
+      return NextResponse.json({ error: "Invalid authentication token" }, { status: 401 });
+    }
+  }
+
+  if (!userId) {
+    return NextResponse.json({ error: "Invalid authentication token" }, { status: 401 });
   }
 
 
@@ -76,7 +110,7 @@ export async function GET(req: NextRequest) {
   const { data: company, error: companyError } = await supabaseAdmin
     .from("kyc_clients")
     .select("id")
-    .eq("owner_user_id", user.id)
+    .eq("owner_user_id", userId)
     .eq("is_active", true)
     .maybeSingle()
 

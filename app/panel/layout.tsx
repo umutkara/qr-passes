@@ -1,16 +1,37 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { supabaseServer } from '../../lib/supabase/server';
+import { cookies } from "next/headers";
 
 export default async function PanelLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = await supabaseServer();
-  const { data } = await supabase.auth.getUser();
+  console.log('PanelLayout - checking auth...');
 
-  if (!data.user) redirect("/login");
+  const cookieStore = await cookies();
+  const allCookies = cookieStore.getAll();
+  console.log('PanelLayout - all cookies:', allCookies.map(c => `${c.name}=${c.value.substring(0, 20)}...`));
+
+  // Check for Supabase cookies
+  const sbAccessToken = cookieStore.get('sb-access-token');
+  const sbRefreshToken = cookieStore.get('sb-refresh-token');
+  const projectRef = process.env.NEXT_PUBLIC_SUPABASE_URL?.split('//')[1]?.split('.')[0];
+  const sbProjectToken = projectRef ? cookieStore.get(`sb-${projectRef}-auth-token`) : null;
+
+  console.log('PanelLayout - Supabase cookies found:', {
+    sbAccessToken: !!sbAccessToken,
+    sbRefreshToken: !!sbRefreshToken,
+    sbProjectToken: !!sbProjectToken,
+    projectRef
+  });
+
+  if (!sbAccessToken && !sbRefreshToken && !sbProjectToken) {
+    console.log('PanelLayout - no auth cookies, redirecting to /login');
+    redirect("/login");
+  }
+
+  console.log('PanelLayout - auth cookies present, rendering panel');
 
   async function handleLogout() {
     "use server";
