@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
 
+export const dynamic = 'force-dynamic';
+
 interface Session {
   id: string;
   customer_id: string;
