@@ -328,7 +328,7 @@ export async function POST(req: NextRequest) {
     console.error("❌ AI review error:", err?.message || err);
 
     // Fallback AI result with full structure
-    const fallbackAi = {
+    const fallbackAi: any = {
       session_id: session_id,
       evidence: {
         document_url: document_url ?? null,
