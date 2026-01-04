@@ -7,7 +7,7 @@ export default async function PanelLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = supabaseServer();
+  const supabase = await supabaseServer();
   const { data } = await supabase.auth.getUser();
 
   if (!data.user) redirect("/login");
