@@ -74,12 +74,8 @@ export async function proxy(request: NextRequest) {
       }
     }
 
-    // Redirect authenticated users away from auth pages
-    if (request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/register') {
-      if (user) {
-        return NextResponse.redirect(new URL('/panel', request.url))
-      }
-    }
+    // NOTE: Removed redirect for /login and /register to avoid conflicts
+    // with client-side authentication flow. Client handles redirects after login.
   } catch (error) {
     console.error('Middleware Supabase error:', error)
     // If Supabase fails, allow the request to continue
