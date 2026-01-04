@@ -40,12 +40,13 @@ export async function POST(req: Request) {
 
     // Create response and set auth cookies manually
     const response = NextResponse.json({ ok: true, user: data.user.email });
+    console.log('API login - response created with JSON');
 
-    // Set Supabase auth cookies
+    // Set Supabase auth cookies (without httpOnly for server component access)
     const { access_token, refresh_token } = data.session;
     if (access_token) {
       response.cookies.set('sb-access-token', access_token, {
-        httpOnly: true,
+        httpOnly: false, // Allow access from client-side
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         path: '/',
@@ -54,7 +55,7 @@ export async function POST(req: Request) {
     }
     if (refresh_token) {
       response.cookies.set('sb-refresh-token', refresh_token, {
-        httpOnly: true,
+        httpOnly: false, // Allow access from client-side
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         path: '/',
@@ -66,7 +67,7 @@ export async function POST(req: Request) {
     const projectRef = process.env.NEXT_PUBLIC_SUPABASE_URL?.split('//')[1]?.split('.')[0];
     if (projectRef && access_token) {
       response.cookies.set(`sb-${projectRef}-auth-token`, access_token, {
-        httpOnly: true,
+        httpOnly: false, // Allow access from client-side
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         path: '/',

@@ -38,9 +38,6 @@ export async function proxy(request: NextRequest) {
     }
   )
 
-  // Auth protection moved to app/panel/layout.tsx (server component)
-  // This middleware auth check is disabled to avoid conflicts
-  /*
   try {
     const {
       data: { user },
@@ -52,22 +49,29 @@ export async function proxy(request: NextRequest) {
     }
 
     console.log('Middleware - Path:', request.nextUrl.pathname)
-    console.log('Middleware - User:', user ? user.email : 'null')
-    console.log('Middleware - Cookies:', request.cookies.getAll().map(c => c.name))
+    // Check for Supabase session cookies
+    const sbAccessToken = request.cookies.get('sb-access-token');
+    const sbRefreshToken = request.cookies.get('sb-refresh-token');
+    const projectRef = process.env.NEXT_PUBLIC_SUPABASE_URL?.split('//')[1]?.split('.')[0];
+    const sbProjectToken = projectRef ? request.cookies.get(`sb-${projectRef}-auth-token`) : null;
+
+    const hasAuthCookies = sbAccessToken || sbRefreshToken || sbProjectToken;
+
+    console.log('Middleware - Auth cookies present:', hasAuthCookies)
 
     // Protect panel routes
     if (request.nextUrl.pathname.startsWith('/panel')) {
-      if (!user) {
-        console.log('Middleware: No authenticated user, redirecting to login')
+      if (!hasAuthCookies) {
+        console.log('Middleware: No auth cookies, redirecting to login')
         return NextResponse.redirect(new URL('/login', request.url))
       }
-      console.log('Middleware: User authenticated, allowing access to panel')
+      console.log('Middleware: Auth cookies present, allowing access to panel')
     }
 
     // Redirect authenticated users away from auth pages
     if (request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/register' || request.nextUrl.pathname === '/forgot-password') {
-      if (user) {
-        console.log('Middleware: Authenticated user on auth page, redirecting to panel')
+      if (hasAuthCookies) {
+        console.log('Middleware: Auth cookies present on auth page, redirecting to panel')
         return NextResponse.redirect(new URL('/panel', request.url))
       }
     }
@@ -76,7 +80,6 @@ export async function proxy(request: NextRequest) {
     console.error('Middleware error:', error)
     // Continue with request if middleware fails
   }
-  */
 
   return response
 }
